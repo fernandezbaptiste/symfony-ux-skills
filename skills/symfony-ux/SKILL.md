@@ -1,19 +1,22 @@
 ---
 name: symfony-ux
-description: Symfony UX frontend stack -- decision tree and orchestrator for choosing between Stimulus, Turbo, TwigComponent, LiveComponent, UX Icons, and UX Map. Use when the user is unsure which tool fits, wants to combine multiple UX packages, or asks a general frontend architecture question in Symfony. Also trigger when the user asks "which UX package should I use", "how to make this interactive", "should I use Stimulus or LiveComponent", "how to structure my Symfony frontend", "what is the difference between Turbo and LiveComponent", "should this be a Frame or a LiveComponent", "how do these UX packages work together", "what is the Symfony way to do frontend". Do NOT trigger when the user clearly names a specific tool (stimulus, turbo, twig-component, live-component, ux-icons, ux-map) -- defer to the specialized skill instead.
+description: Symfony UX frontend stack -- decision tree and orchestrator for choosing between Stimulus, Turbo, TwigComponent, LiveComponent, UX Icons, and UX Map. Use when the user is unsure which tool fits, wants to combine multiple UX packages, or asks a general frontend architecture question in Symfony. Also trigger when the user asks "which UX package should I use", "how to make this interactive", "should I use Stimulus or LiveComponent", "how to structure my Symfony frontend", "what is the difference between Turbo and LiveComponent", "should this be a Frame or a LiveComponent", "how do these UX packages work together", "what is the Symfony way to do frontend", "add real-time updates to my page", "build a reactive form without JavaScript". Do NOT trigger when the user clearly names a specific tool (stimulus, turbo, twig-component, live-component, ux-icons, ux-map) -- defer to the specialized skill instead.
+compatibility: symfony/framework-bundle >= 6.4
 license: MIT
 metadata:
   author: Simon Andre
   email: smn.andre@gmail.com
   url: https://smnandre.dev
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Symfony UX
 
-Modern frontend stack for Symfony. Build reactive UIs with minimal JavaScript using server-rendered HTML.
+Modern frontend stack for Symfony (6.4+/7.x). Build reactive UIs with minimal JavaScript using server-rendered HTML.
 
 Symfony UX follows a progressive enhancement philosophy: start with plain HTML, add interactivity only where needed, and prefer server-side rendering over client-side JavaScript. Each tool solves a specific problem -- pick the simplest one that fits.
+
+**Key principle:** always choose the least powerful tool that solves the problem. Static markup > TwigComponent > Turbo Frame > LiveComponent > custom Stimulus controller.
 
 ## Decision Tree: Which Tool?
 
@@ -316,6 +319,19 @@ assets/
       logo.svg               # UX Icons (namespaced: header:logo)
 ```
 
+## Migration Path
+
+When requirements grow, move up the stack incrementally:
+
+```
+Static HTML -> TwigComponent (need reusability)
+           -> Turbo Frame (need partial updates)
+           -> LiveComponent (need reactivity)
+           -> Stimulus (need custom JS)
+```
+
+Each migration is additive -- wrap the existing markup in the next tool. You rarely need to rewrite.
+
 ## Anti-Patterns to Avoid
 
 **Don't use LiveComponent for static content.** If a component never re-renders after initial load, use TwigComponent instead -- LiveComponent adds unnecessary overhead (AJAX requests, state serialization).
@@ -325,6 +341,8 @@ assets/
 **Don't reach for Stimulus when Turbo handles it.** Before writing a Stimulus controller for a link or form interaction, check if Turbo Drive/Frames already handle it.
 
 **Don't fight Turbo Drive.** If a link or form behaves oddly with Turbo, the fix is usually to ensure the server returns a proper full HTML page, not to disable Turbo.
+
+**Don't nest LiveComponents without `data-model` propagation.** Parent and child LiveComponents are independent by default. Use `emit`/`listen` or `data-model` to communicate between them.
 
 ## Anti-Patterns for Icons and Map
 
